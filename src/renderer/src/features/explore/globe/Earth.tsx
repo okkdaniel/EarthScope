@@ -4,41 +4,41 @@ import { latLngToVector3 } from '@shared/utils/geo'
 import { getWorldLineGeometry } from './geo/worldGeometry'
 import { GLOBE_RADIUS } from './globeConstants'
 
-const SPHERE_COLOR = new Color('#edede9') // warm paper, a touch deeper than the canvas
+const SPHERE_COLOR = new Color('#ffffff') // flat white — the globe reads like paper
 const COASTLINE_COLOR = new Color('#0a0a0a') // ink
-const BORDER_COLOR = new Color('#6b6b68') // secondary ink
-const GRATICULE_COLOR = new Color('#c9c9c4') // quiet hairline
+const BORDER_COLOR = new Color('#0a0a0a') // ink, drawn quieter via opacity
+const GRATICULE_COLOR = new Color('#0a0a0a') // ink, very faint construction lines
 
 /**
- * The Earth as an engineering survey: a warm paper sphere carrying thin ink
+ * The Earth as an engineering survey: a flat white sphere carrying thin black
  * coastlines, quieter country borders and a faint graticule — the same
- * ink-on-warm-gray, iso-line language as the brand contour mark. No textures,
- * no photorealism, no atmosphere glow. Colour is reserved entirely for events.
+ * ink-on-white, iso-line language as the brand contour mark. No textures, no
+ * shading, no atmosphere. The sphere is unlit (meshBasicMaterial) so it stays
+ * pure white; the curving lines give it its form. Colour is reserved for events.
  */
-export function Earth(): JSX.Element {
-  const { coastlines, borders } = useMemo(
-    () => getWorldLineGeometry(GLOBE_RADIUS * 1.001),
-    []
-  )
+export function Earth({ showGraticule = true }: { showGraticule?: boolean }): JSX.Element {
+  const { coastlines, borders } = useMemo(() => getWorldLineGeometry(GLOBE_RADIUS * 1.001), [])
   const graticule = useMemo(() => buildGraticule(GLOBE_RADIUS * 1.0015), [])
 
   return (
     <group>
       <mesh>
         <sphereGeometry args={[GLOBE_RADIUS, 96, 96]} />
-        <meshStandardMaterial color={SPHERE_COLOR} roughness={0.95} metalness={0} />
+        <meshBasicMaterial color={SPHERE_COLOR} />
       </mesh>
 
-      <lineSegments geometry={graticule}>
-        <lineBasicMaterial color={GRATICULE_COLOR} transparent opacity={0.5} />
-      </lineSegments>
+      {showGraticule && (
+        <lineSegments geometry={graticule}>
+          <lineBasicMaterial color={GRATICULE_COLOR} transparent opacity={0.08} />
+        </lineSegments>
+      )}
 
       <lineSegments geometry={borders}>
-        <lineBasicMaterial color={BORDER_COLOR} transparent opacity={0.45} />
+        <lineBasicMaterial color={BORDER_COLOR} transparent opacity={0.35} />
       </lineSegments>
 
       <lineSegments geometry={coastlines}>
-        <lineBasicMaterial color={COASTLINE_COLOR} transparent opacity={0.85} />
+        <lineBasicMaterial color={COASTLINE_COLOR} transparent opacity={0.9} />
       </lineSegments>
     </group>
   )
@@ -50,13 +50,11 @@ function buildGraticule(radius: number): BufferGeometry {
   const STEP = 30
   const SEG = 4
 
-  // Parallels (constant latitude).
   for (let lat = -60; lat <= 60; lat += STEP) {
     for (let lng = -180; lng < 180; lng += SEG) {
       pushSegment(positions, lat, lng, lat, lng + SEG, radius)
     }
   }
-  // Meridians (constant longitude).
   for (let lng = -180; lng < 180; lng += STEP) {
     for (let lat = -90; lat < 90; lat += SEG) {
       pushSegment(positions, lat, lng, lat + SEG, lng, radius)

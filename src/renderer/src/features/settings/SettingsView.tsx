@@ -86,9 +86,9 @@ export function SettingsView(): JSX.Element {
         </Section>
 
         <Section title="Globe">
-          <SettingRow title="Atmosphere" description="A faint hairline halo at the limb.">
+          <SettingRow title="Graticule" description="Faint latitude / longitude survey lines.">
             <Toggle
-              label="Atmosphere"
+              label="Graticule"
               checked={settings.showAtmosphere}
               onChange={(v) => set('showAtmosphere', v)}
             />

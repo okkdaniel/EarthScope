@@ -14,7 +14,7 @@ export function AboutView(): JSX.Element {
   const info = useAppInfo()
 
   return (
-    <div className="relative h-full overflow-y-auto">
+    <div className="relative h-full overflow-y-auto overflow-x-clip">
       <ContourMark
         className="absolute bottom-0 left-0 w-[680px]"
         style={{ transform: 'translate(-26%, 30%)' }}
@@ -24,11 +24,13 @@ export function AboutView(): JSX.Element {
 
       <div className="relative mx-auto max-w-2xl space-y-14 px-10 pb-16 pt-10">
         <section>
+          <AnuraLogo size={56} className="mb-6" />
           <h2 className="display text-5xl leading-none tracking-display-tight text-content-primary">
             EarthScope
           </h2>
           <p className="mt-4 max-w-md text-base leading-relaxed text-content-secondary">
-            A desktop instrument for exploring real-time natural events across Earth.
+            A desktop instrument for exploring real-time natural events across Earth, built by
+            Anura.
           </p>
           <Eyebrow className="mt-4">Version {info?.version ?? '—'}</Eyebrow>
         </section>

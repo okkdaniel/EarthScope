@@ -24,15 +24,15 @@ export const VISUAL_ID: Record<EventVisual, number> = {
 }
 
 const BASE_SIZE: Partial<Record<EventVisual, number>> = {
-  wildfire: 22,
-  volcano: 24,
-  storm: 30,
-  flood: 22,
-  seaice: 20,
-  dust: 22
+  wildfire: 16,
+  volcano: 17,
+  storm: 20,
+  flood: 16,
+  seaice: 15,
+  dust: 15
 }
 
-const DEFAULT_SIZE = 20
+const DEFAULT_SIZE = 15
 
 export interface MarkerVisual {
   color: Color

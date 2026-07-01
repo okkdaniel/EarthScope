@@ -73,11 +73,11 @@ function ClusterBadge({
             onClick(cluster)
           }}
           aria-label={`${cluster.count} ${meta.label} events — zoom in`}
-          className="flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-2xs font-semibold text-white transition-transform duration-150 ease-out hover:scale-110"
+          className="tabular hover-fade flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 text-2xs text-content-primary"
           style={{
             pointerEvents: 'auto',
-            backgroundColor: meta.color,
-            boxShadow: `0 0 0 3px ${meta.color}33`
+            background: '#ffffff',
+            border: `1.5px solid ${meta.color}`
           }}
         >
           {cluster.count}

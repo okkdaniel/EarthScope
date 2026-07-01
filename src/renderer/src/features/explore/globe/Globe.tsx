@@ -2,7 +2,6 @@ import { Suspense, useMemo } from 'react'
 import { Canvas } from '@react-three/fiber'
 import type { NaturalEvent } from '@shared/models/event'
 import { Earth } from './Earth'
-import { Atmosphere } from './Atmosphere'
 import { MarkerLayer } from './MarkerLayer'
 import { SelectionRing } from './SelectionRing'
 import { CameraRig, type CameraTarget } from './CameraRig'
@@ -25,7 +24,7 @@ export function Globe({ events }: GlobeProps): JSX.Element {
   const focusLocation = useUiStore((s) => s.focusLocation)
   const selectEvent = useUiStore((s) => s.selectEvent)
   const clearFocus = useUiStore((s) => s.clearFocus)
-  const showAtmosphere = useSettingsStore((s) => s.settings.showAtmosphere)
+  const showGraticule = useSettingsStore((s) => s.settings.showAtmosphere)
 
   const selectedEvent = useMemo(
     () => events.find((event) => event.id === selectedEventId) ?? null,
@@ -54,15 +53,12 @@ export function Globe({ events }: GlobeProps): JSX.Element {
       gl={{ antialias: true, alpha: false }}
       onPointerMissed={() => selectEvent(null)}
     >
-      {/* Warm canvas — the globe sits on the page like a plate, no dark void. */}
+      {/* Warm canvas — the globe sits on the page like a plate, no dark void.
+          The sphere and lines are unlit, so the scene needs no lights. */}
       <color attach="background" args={['#f4f4f2']} />
-      <ambientLight intensity={0.9} />
-      <directionalLight position={[4, 3, 5]} intensity={0.55} color="#ffffff" />
-      <directionalLight position={[-4, -2, -3]} intensity={0.15} color="#d8d4cc" />
 
       <Suspense fallback={null}>
-        <Earth />
-        <Atmosphere visible={showAtmosphere} />
+        <Earth showGraticule={showGraticule} />
         <MarkerLayer events={events} onSelect={selectEvent} />
         {selectedEvent && <SelectionRing event={selectedEvent} />}
       </Suspense>

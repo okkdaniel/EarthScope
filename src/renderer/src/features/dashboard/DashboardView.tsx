@@ -29,8 +29,8 @@ export function DashboardView(): JSX.Element {
   const topCategory = stats.byCategory[0]
 
   return (
-    <div className="relative h-full overflow-y-auto">
-      <ContourMark className="absolute right-0 top-0 w-[720px]" style={{ transform: 'translate(22%, -30%)' }} />
+    <div className="relative h-full overflow-y-auto overflow-x-clip">
+      <ContourMark className="absolute right-0 top-0 w-[560px]" style={{ transform: 'translate(30%, -30%)' }} />
 
       <ViewHeader
         eyebrow="Live overview"
