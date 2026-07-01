@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+  }
+
+  body {
+    @apply bg-surface-base text-content-primary font-sans antialiased;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    user-select: none;
+  }
+
+  /* Text meant to be selectable (event descriptions, coordinates, etc.). */
+  .selectable {
+    user-select: text;
+    cursor: text;
+  }
+
+  /* Calm, thin scrollbars consistent with the interface. */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-surface-border rounded-full;
+    border: 3px solid transparent;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #3a4150;
+    background-clip: padding-box;
+  }
+
+  /* Consistent, visible focus states for keyboard users (accessibility). */
+  :focus-visible {
+    @apply outline-none ring-2 ring-accent ring-offset-2 ring-offset-surface-base;
+  }
+}
+
+@layer components {
+  .panel {
+    @apply bg-surface-raised border border-surface-border rounded-2xl;
+  }
+
+  .nav-item {
+    @apply flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-content-secondary
+      transition-colors duration-150 ease-out-soft hover:bg-surface-hover hover:text-content-primary;
+  }
+
+  .nav-item[data-active='true'] {
+    @apply bg-surface-hover text-content-primary;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

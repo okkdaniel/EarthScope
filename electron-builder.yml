@@ -1,0 +1,48 @@
+appId: app.earthscope.desktop
+productName: EarthScope
+copyright: Copyright © 2026 EarthScope
+
+directories:
+  buildResources: build
+  output: release
+
+files:
+  - out/**/*
+  - package.json
+
+# Note: the world-atlas TopoJSON is imported into the renderer bundle at build
+# time (see globe/geo/worldGeometry.ts), so no extra runtime resources are
+# required and the app remains fully functional offline.
+
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  artifactName: ${productName}-${version}-Setup.${ext}
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  deleteAppDataOnUninstall: false
+
+mac:
+  target:
+    - target: dmg
+      arch: [x64, arm64]
+  category: public.app-category.education
+  artifactName: ${productName}-${version}-${arch}.${ext}
+  hardenedRuntime: true
+  gatekeeperAssess: false
+
+linux:
+  target:
+    - AppImage
+    - deb
+  category: Education
+  maintainer: EarthScope
+  artifactName: ${productName}-${version}.${ext}
+
+publish:
+  provider: github
+  releaseType: release
