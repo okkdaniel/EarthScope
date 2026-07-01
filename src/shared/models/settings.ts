@@ -38,7 +38,7 @@ export interface AppSettings {
 export const DEFAULT_SETTINGS: AppSettings = {
   refreshIntervalMinutes: 15,
   units: 'metric',
-  theme: 'dark',
+  theme: 'light',
   animationSpeed: 1,
   globeAutoRotate: 0.15,
   cameraSensitivity: 1,

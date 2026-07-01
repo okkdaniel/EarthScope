@@ -1,18 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
-import {
-  Search,
-  Globe2,
-  LayoutDashboard,
-  Clock,
-  BarChart3,
-  Settings,
-  CornerDownLeft
-} from 'lucide-react'
 import { rankEvents } from '@shared/services/search'
 import { resolveCategoryMeta } from '@shared/models/category'
 import { formatCoordinates } from '@shared/utils/geo'
 import { CategoryDot } from '../../components/common/CategoryDot'
+import { MetaList } from '../../components/editorial/MetaList'
 import { useEvents } from '../../hooks/useEvents'
 import { useUiStore, type ViewId } from '../../state/uiStore'
 import { cn } from '../../utils/cn'
@@ -21,21 +13,20 @@ interface NavCommand {
   kind: 'nav'
   id: ViewId
   label: string
-  icon: typeof Globe2
 }
 
 const NAV_COMMANDS: NavCommand[] = [
-  { kind: 'nav', id: 'dashboard', label: 'Go to Dashboard', icon: LayoutDashboard },
-  { kind: 'nav', id: 'explore', label: 'Go to Explore', icon: Globe2 },
-  { kind: 'nav', id: 'timeline', label: 'Go to Timeline', icon: Clock },
-  { kind: 'nav', id: 'analytics', label: 'Go to Analytics', icon: BarChart3 },
-  { kind: 'nav', id: 'settings', label: 'Go to Settings', icon: Settings }
+  { kind: 'nav', id: 'dashboard', label: 'Go to Dashboard' },
+  { kind: 'nav', id: 'explore', label: 'Go to Explore' },
+  { kind: 'nav', id: 'timeline', label: 'Go to Timeline' },
+  { kind: 'nav', id: 'analytics', label: 'Go to Analytics' },
+  { kind: 'nav', id: 'settings', label: 'Go to Settings' }
 ]
 
 /**
- * A Raycast/Linear-style command palette (⌘K). Searches events and offers quick
- * navigation, with full keyboard control. Selecting an event flies the globe to
- * it; selecting a command switches views.
+ * A command palette (⌘K) in the editorial vocabulary: an opaque hairline-bordered
+ * column over a quiet ink scrim (no blur, no shadow). Search events or jump
+ * between views with full keyboard control.
  */
 export function CommandPalette(): JSX.Element {
   const query = useEvents()
@@ -51,7 +42,6 @@ export function CommandPalette(): JSX.Element {
   useEffect(() => inputRef.current?.focus(), [])
 
   const events = useMemo(() => query.data?.events ?? [], [query.data])
-
   const matchedEvents = useMemo(() => rankEvents(events, text, 8), [events, text])
   const matchedNav = useMemo(() => {
     const q = text.trim().toLowerCase()
@@ -100,86 +90,123 @@ export function CommandPalette(): JSX.Element {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.15 }}
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 pt-[12vh]"
+      transition={{ duration: 0.16 }}
+      className="fixed inset-0 z-50 flex items-start justify-center pt-[14vh]"
+      style={{ background: 'rgba(10, 10, 10, 0.24)' }}
       onClick={closeCommandPalette}
     >
       <motion.div
-        initial={{ scale: 0.98, y: -8, opacity: 0 }}
-        animate={{ scale: 1, y: 0, opacity: 1 }}
-        exit={{ scale: 0.98, y: -8, opacity: 0 }}
-        transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-        className="w-full max-w-xl overflow-hidden panel shadow-overlay"
+        initial={{ y: -8, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: -8, opacity: 0 }}
+        transition={{ duration: 0.2, ease: [0.22, 0.61, 0.36, 1] }}
+        className="w-full max-w-xl overflow-hidden border border-content-primary bg-surface-base"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-label="Command palette"
       >
-        <div className="flex items-center gap-3 border-b border-surface-border px-4">
-          <Search className="h-4 w-4 text-content-tertiary" strokeWidth={1.75} />
+        <div className="border-b border-content-primary px-5">
           <input
             ref={inputRef}
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={onKeyDown}
             placeholder="Search events or jump to…"
-            className="h-12 flex-1 bg-transparent text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none"
+            className="h-14 w-full bg-transparent text-base text-content-primary placeholder:text-content-tertiary focus:outline-none"
           />
         </div>
 
-        <div ref={listRef} className="max-h-[52vh] overflow-y-auto p-2">
+        <div ref={listRef} className="max-h-[52vh] overflow-y-auto py-2">
           {items.length === 0 ? (
-            <p className="px-3 py-6 text-center text-sm text-content-tertiary">No results found.</p>
+            <p className="px-5 py-6 text-center text-sm text-content-secondary">No results found.</p>
           ) : (
             items.map((item, index) => {
               const active = index === activeIndex
               if (item.type === 'nav') {
-                const Icon = item.command.icon
                 return (
-                  <button
+                  <Row
                     key={`nav-${item.command.id}`}
-                    data-index={index}
-                    onMouseMove={() => setActiveIndex(index)}
-                    onClick={() => runItem(index)}
-                    className={cn(
-                      'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm',
-                      active ? 'bg-surface-hover text-content-primary' : 'text-content-secondary'
-                    )}
+                    index={index}
+                    active={active}
+                    onHover={setActiveIndex}
+                    onRun={runItem}
                   >
-                    <Icon className="h-4 w-4 text-content-tertiary" strokeWidth={1.75} />
-                    {item.command.label}
-                    {active && (
-                      <CornerDownLeft className="ml-auto h-3.5 w-3.5 text-content-tertiary" />
-                    )}
-                  </button>
+                    <span className="text-sm uppercase tracking-meta text-content-primary">
+                      {item.command.label}
+                    </span>
+                  </Row>
                 )
               }
               const event = item.event
               return (
-                <button
+                <Row
                   key={`event-${event.id}`}
-                  data-index={index}
-                  onMouseMove={() => setActiveIndex(index)}
-                  onClick={() => runItem(index)}
-                  className={cn(
-                    'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left',
-                    active ? 'bg-surface-hover' : ''
-                  )}
+                  index={index}
+                  active={active}
+                  onHover={setActiveIndex}
+                  onRun={runItem}
                 >
-                  <CategoryDot categoryId={event.categoryId} size={9} />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm text-content-primary">{event.title}</p>
-                    <p className="truncate text-2xs text-content-tertiary">
-                      {resolveCategoryMeta(event.categoryId).label} ·{' '}
-                      {formatCoordinates(event.position)}
-                    </p>
-                  </div>
-                  {active && <CornerDownLeft className="h-3.5 w-3.5 text-content-tertiary" />}
-                </button>
+                  <span className="flex min-w-0 items-baseline gap-2">
+                    <CategoryDot categoryId={event.categoryId} size={6} />
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm text-content-primary">
+                        {event.title}
+                      </span>
+                      <MetaList
+                        className="text-2xs"
+                        items={[
+                          resolveCategoryMeta(event.categoryId).label,
+                          formatCoordinates(event.position)
+                        ]}
+                      />
+                    </span>
+                  </span>
+                </Row>
               )
             })
           )}
         </div>
       </motion.div>
     </motion.div>
+  )
+}
+
+function Row({
+  index,
+  active,
+  onHover,
+  onRun,
+  children
+}: {
+  index: number
+  active: boolean
+  onHover: (index: number) => void
+  onRun: (index: number) => void
+  children: React.ReactNode
+}): JSX.Element {
+  return (
+    <button
+      data-index={index}
+      onMouseMove={() => onHover(index)}
+      onClick={() => onRun(index)}
+      className={cn(
+        'relative flex w-full items-center justify-between gap-3 px-5 py-2 text-left',
+        active ? 'bg-surface-overlay' : ''
+      )}
+    >
+      <span
+        aria-hidden
+        className={cn(
+          'absolute left-0 top-1/2 h-5 w-px -translate-y-1/2 bg-content-primary transition-opacity',
+          active ? 'opacity-100' : 'opacity-0'
+        )}
+      />
+      {children}
+      {active && (
+        <span aria-hidden className="shrink-0 text-content-tertiary">
+          →
+        </span>
+      )}
+    </button>
   )
 }

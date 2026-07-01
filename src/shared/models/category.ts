@@ -58,91 +58,91 @@ export const CATEGORY_META: Record<EventCategoryId, CategoryMeta> = {
   wildfires: {
     id: 'wildfires',
     label: 'Wildfires',
-    color: '#ff6b35',
+    color: '#d1461f',
     visual: 'wildfire',
     description: 'Active fires and burning vegetation.'
   },
   volcanoes: {
     id: 'volcanoes',
     label: 'Volcanoes',
-    color: '#ff3b30',
+    color: '#b3271a',
     visual: 'volcano',
     description: 'Eruptions and volcanic activity.'
   },
   severeStorms: {
     id: 'severeStorms',
     label: 'Severe Storms',
-    color: '#7c5cff',
+    color: '#5a45b8',
     visual: 'storm',
     description: 'Cyclones, hurricanes and severe weather systems.'
   },
   floods: {
     id: 'floods',
     label: 'Floods',
-    color: '#3aa0ff',
+    color: '#2e6fb0',
     visual: 'flood',
     description: 'Flooding and inundation events.'
   },
   seaLakeIce: {
     id: 'seaLakeIce',
     label: 'Sea & Lake Ice',
-    color: '#3fd6d6',
+    color: '#2a8f8f',
     visual: 'seaice',
     description: 'Sea and lake ice formation and movement.'
   },
   dustHaze: {
     id: 'dustHaze',
     label: 'Dust & Haze',
-    color: '#d6a35c',
+    color: '#a9772f',
     visual: 'dust',
     description: 'Dust storms and atmospheric haze.'
   },
   earthquakes: {
     id: 'earthquakes',
     label: 'Earthquakes',
-    color: '#e0b13a',
+    color: '#a67c1a',
     visual: 'earthquake',
     description: 'Seismic events.'
   },
   landslides: {
     id: 'landslides',
     label: 'Landslides',
-    color: '#b06a3a',
+    color: '#7a4a28',
     visual: 'landslide',
     description: 'Landslides and mass earth movement.'
   },
   snow: {
     id: 'snow',
     label: 'Snow',
-    color: '#c9d6e5',
+    color: '#7d8ba0',
     visual: 'snow',
     description: 'Significant snowfall events.'
   },
   drought: {
     id: 'drought',
     label: 'Drought',
-    color: '#c98a3a',
+    color: '#9a6a24',
     visual: 'drought',
     description: 'Prolonged dry conditions.'
   },
   tempExtremes: {
     id: 'tempExtremes',
     label: 'Temperature Extremes',
-    color: '#ff8a5c',
+    color: '#c85a2a',
     visual: 'temperature',
     description: 'Extreme heat or cold events.'
   },
   waterColor: {
     id: 'waterColor',
     label: 'Water Color',
-    color: '#2fb6c9',
+    color: '#227a8a',
     visual: 'water',
     description: 'Algal blooms and water discoloration.'
   },
   manmade: {
     id: 'manmade',
     label: 'Manmade',
-    color: '#8a94a3',
+    color: '#6b6b68',
     visual: 'other',
     description: 'Human-caused events.'
   }

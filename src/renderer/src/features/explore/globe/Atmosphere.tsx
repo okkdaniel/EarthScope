@@ -1,11 +1,11 @@
 import { useMemo } from 'react'
-import { BackSide, Color, ShaderMaterial } from 'three'
+import { BackSide, Color, NormalBlending, ShaderMaterial } from 'three'
 import { ATMOSPHERE_RADIUS } from './globeConstants'
 
 /**
- * A soft atmospheric halo using a Fresnel term on a slightly larger back-facing
- * sphere. Gives the globe a gentle glow at the limb (CLAUDE.md: "Soft
- * atmospheric glow") without washing over the surface detail.
+ * A faint limb — a hairline of soft shading just outside the sphere's edge. Not
+ * a glow (the system forbids glows): a low-opacity Fresnel rim in ink that reads
+ * as the drawn edge of the survey, keeping the globe legible on the warm canvas.
  */
 export function Atmosphere({ visible = true }: { visible?: boolean }): JSX.Element | null {
   const material = useMemo(
@@ -13,10 +13,11 @@ export function Atmosphere({ visible = true }: { visible?: boolean }): JSX.Eleme
       new ShaderMaterial({
         transparent: true,
         side: BackSide,
+        blending: NormalBlending,
         depthWrite: false,
         uniforms: {
-          uColor: { value: new Color('#4c8bf5') },
-          uIntensity: { value: 0.9 }
+          uColor: { value: new Color('#0a0a0a') },
+          uIntensity: { value: 0.16 }
         },
         vertexShader: /* glsl */ `
           varying vec3 vNormal;
@@ -30,8 +31,7 @@ export function Atmosphere({ visible = true }: { visible?: boolean }): JSX.Eleme
           uniform vec3 uColor;
           uniform float uIntensity;
           void main() {
-            // Rim brightens toward the silhouette edge.
-            float rim = pow(1.0 - abs(vNormal.z), 3.0);
+            float rim = pow(1.0 - abs(vNormal.z), 4.0);
             gl_FragColor = vec4(uColor, rim * uIntensity);
           }
         `

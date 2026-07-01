@@ -1,16 +1,17 @@
-import { Play, Pause } from 'lucide-react'
 import { Globe } from '../explore/globe/Globe'
 import { useTimeline } from './useTimeline'
 import { useFilteredEvents } from '../../hooks/useFilteredEvents'
 import { IconButton } from '../../components/ui/IconButton'
+import { PlayGlyph, PauseGlyph } from '../../components/editorial/Glyph'
+import { Eyebrow } from '../../components/editorial/Eyebrow'
 
 const dateLabel = (ms: number): string =>
   new Date(ms).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
 
 /**
- * The timeline workspace. The globe fills the view while a scrubber along the
- * bottom sweeps a time cursor; markers appear and fade as events become active
- * or resolve, so history plays back smoothly.
+ * The timeline workspace. The globe fills the view while a hairline-bordered
+ * scrubber sweeps a time cursor; markers appear and fade as events become
+ * active or resolve, so history plays back smoothly.
  */
 export function TimelineView(): JSX.Element {
   const { all } = useFilteredEvents()
@@ -26,49 +27,42 @@ export function TimelineView(): JSX.Element {
       <Globe events={timeline.visibleEvents} />
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 p-6">
-        <div className="pointer-events-auto mx-auto max-w-3xl panel shadow-panel">
-          <div className="flex items-center gap-4 p-4">
-            <IconButton
-              label={timeline.playing ? 'Pause playback' : 'Play timeline'}
-              onClick={timeline.togglePlay}
-              className="bg-accent text-white hover:bg-accent/90 hover:text-white"
-            >
-              {timeline.playing ? (
-                <Pause className="h-4 w-4" strokeWidth={2} />
-              ) : (
-                <Play className="h-4 w-4" strokeWidth={2} />
-              )}
-            </IconButton>
+        <div className="pointer-events-auto mx-auto flex max-w-3xl items-center gap-5 border border-content-primary bg-surface-base px-5 py-4">
+          <IconButton
+            label={timeline.playing ? 'Pause playback' : 'Play timeline'}
+            onClick={timeline.togglePlay}
+            className="text-content-primary"
+          >
+            {timeline.playing ? <PauseGlyph size={16} /> : <PlayGlyph size={16} />}
+          </IconButton>
 
-            <div className="min-w-0 flex-1">
-              <div className="mb-1.5 flex items-center justify-between text-2xs text-content-tertiary">
-                <span>{dateLabel(timeline.min)}</span>
-                <span className="font-medium text-content-primary">
-                  {dateLabel(timeline.cursor)}
-                </span>
-                <span>{dateLabel(timeline.max)}</span>
-              </div>
-              <div className="relative">
-                <input
-                  type="range"
-                  min={timeline.min}
-                  max={timeline.max}
-                  value={timeline.cursor}
-                  onChange={(e) => timeline.setCursor(Number(e.target.value))}
-                  className="w-full accent-accent"
-                  aria-label="Timeline position"
-                />
-                <div
-                  className="pointer-events-none absolute left-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-accent/40"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
+          <div className="min-w-0 flex-1">
+            <div className="mb-2 flex items-baseline justify-between text-2xs uppercase tracking-meta text-content-secondary">
+              <span className="tabular">{dateLabel(timeline.min)}</span>
+              <span className="tabular text-content-primary">{dateLabel(timeline.cursor)}</span>
+              <span className="tabular">{dateLabel(timeline.max)}</span>
             </div>
-
-            <div className="w-24 shrink-0 text-right text-xs text-content-secondary">
-              {timeline.visibleEvents.length} active
+            <div className="relative">
+              <input
+                type="range"
+                min={timeline.min}
+                max={timeline.max}
+                value={timeline.cursor}
+                onChange={(e) => timeline.setCursor(Number(e.target.value))}
+                className="w-full accent-content-primary"
+                aria-label="Timeline position"
+              />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute left-0 top-1/2 h-px -translate-y-1/2 bg-content-primary"
+                style={{ width: `${progress}%` }}
+              />
             </div>
           </div>
+
+          <Eyebrow className="w-20 shrink-0 text-right">
+            <span className="tabular">{timeline.visibleEvents.length}</span> active
+          </Eyebrow>
         </div>
       </div>
     </div>

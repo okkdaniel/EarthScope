@@ -1,10 +1,14 @@
-import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import type { TimeBucket } from '@shared/services/aggregate'
 
+const INK = '#0a0a0a'
+const QUIET = '#8a8a86'
+const RULE = '#e7e7e3'
+
 /**
- * A smooth area chart of new events per day over the last 30 days. Uses a single
- * accent colour and a soft gradient — no gridlines clutter (CLAUDE.md: calm,
- * restrained visuals).
+ * New events per day over 30 days, drawn as a thin ink line on the warm canvas.
+ * Monochrome, no gradient, hairline gridlines — an engineering plot, not a
+ * dashboard chart.
  */
 export function EventsOverTimeChart({ data }: { data: TimeBucket[] }): JSX.Element {
   const chartData = data.map((bucket) => ({
@@ -15,43 +19,39 @@ export function EventsOverTimeChart({ data }: { data: TimeBucket[] }): JSX.Eleme
   return (
     <ResponsiveContainer width="100%" height={220}>
       <AreaChart data={chartData} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
-        <defs>
-          <linearGradient id="eventsGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#4c8bf5" stopOpacity={0.35} />
-            <stop offset="100%" stopColor="#4c8bf5" stopOpacity={0} />
-          </linearGradient>
-        </defs>
+        <CartesianGrid stroke={RULE} vertical={false} />
         <XAxis
           dataKey="date"
-          tick={{ fill: '#6b7280', fontSize: 11 }}
-          axisLine={false}
+          tick={{ fill: QUIET, fontSize: 11 }}
+          axisLine={{ stroke: INK }}
           tickLine={false}
           interval={4}
         />
         <YAxis
-          tick={{ fill: '#6b7280', fontSize: 11 }}
+          tick={{ fill: QUIET, fontSize: 11 }}
           axisLine={false}
           tickLine={false}
           allowDecimals={false}
           width={40}
         />
         <Tooltip
-          cursor={{ stroke: '#2a2f38' }}
+          cursor={{ stroke: QUIET }}
           contentStyle={{
-            background: '#1a1e25',
-            border: '1px solid #2a2f38',
-            borderRadius: 10,
+            background: '#f4f4f2',
+            border: '1px solid #0a0a0a',
+            borderRadius: 0,
             fontSize: 12,
-            color: '#e7ebf0'
+            color: '#0a0a0a'
           }}
-          labelStyle={{ color: '#9aa3af' }}
+          labelStyle={{ color: '#6b6b68' }}
         />
         <Area
           type="monotone"
           dataKey="count"
-          stroke="#4c8bf5"
-          strokeWidth={2}
-          fill="url(#eventsGradient)"
+          stroke={INK}
+          strokeWidth={1.25}
+          fill={INK}
+          fillOpacity={0.04}
           animationDuration={600}
         />
       </AreaChart>

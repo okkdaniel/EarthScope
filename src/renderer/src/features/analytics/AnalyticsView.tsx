@@ -1,8 +1,9 @@
-import { Download, FileJson, CheckCircle2 } from 'lucide-react'
 import { formatDuration, formatDateTime } from '@shared/utils/time'
 import { ViewHeader } from '../../components/common/ViewHeader'
 import { StatCard } from '../../components/common/StatCard'
-import { Button } from '../../components/ui/Button'
+import { SectionHeading } from '../../components/editorial/SectionHeading'
+import { EditorialLink } from '../../components/editorial/EditorialLink'
+import { MetaList } from '../../components/editorial/MetaList'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { CategoryDot } from '../../components/common/CategoryDot'
 import { CategoryBreakdown } from './charts/CategoryBreakdown'
@@ -13,8 +14,8 @@ import { useFilteredEvents } from '../../hooks/useFilteredEvents'
 import { exportEventsCsv, exportEventsJson } from '../../utils/export'
 
 /**
- * The analytics dashboard. Summarises the active event set across categories,
- * regions and time, and offers CSV/JSON export of the underlying data.
+ * The analytics ledger. Distributions across categories, regions and time,
+ * with CSV/JSON export — rendered monochrome, grouped by rule not by card.
  */
 export function AnalyticsView(): JSX.Element {
   const { stats, isLoading } = useEventStats()
@@ -23,71 +24,79 @@ export function AnalyticsView(): JSX.Element {
   return (
     <div className="h-full overflow-y-auto">
       <ViewHeader
+        eyebrow="Analysis"
         title="Analytics"
-        subtitle="Trends and distributions across the current event set."
+        subtitle="Distributions across the current event set."
         actions={
           <>
-            <Button size="sm" onClick={() => exportEventsCsv(filtered)}>
-              <Download className="h-3.5 w-3.5" strokeWidth={1.75} /> CSV
-            </Button>
-            <Button size="sm" onClick={() => exportEventsJson(filtered)}>
-              <FileJson className="h-3.5 w-3.5" strokeWidth={1.75} /> JSON
-            </Button>
+            <EditorialLink
+              as="button"
+              className="text-2xs uppercase tracking-meta"
+              onClick={() => exportEventsCsv(filtered)}
+            >
+              Export CSV
+            </EditorialLink>
+            <EditorialLink
+              as="button"
+              className="text-2xs uppercase tracking-meta"
+              onClick={() => exportEventsJson(filtered)}
+            >
+              Export JSON
+            </EditorialLink>
           </>
         }
       />
 
-      <div className="space-y-6 px-8 pb-10">
+      <div className="space-y-14 px-10 pb-16 pt-10">
         {isLoading ? (
-          <Skeleton className="h-24 rounded-2xl" />
+          <Skeleton className="h-24" />
         ) : (
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-4 gap-8">
             <StatCard label="Total events" value={stats.total} />
-            <StatCard label="Active" value={stats.active} accent="#3fd6d6" />
+            <StatCard label="Active" value={stats.active} />
             <StatCard label="Resolved" value={stats.closed} />
-            <StatCard label="Avg. duration" value={formatDuration(stats.averageDurationMs)} />
+            <StatCard label="Average duration" value={formatDuration(stats.averageDurationMs)} />
           </div>
         )}
 
-        <div className="grid grid-cols-3 gap-6">
-          <section className="col-span-2 panel p-5">
-            <h2 className="mb-4 text-sm font-semibold text-content-primary">
-              New events over time
-            </h2>
+        <div className="grid grid-cols-3 gap-12">
+          <section className="col-span-2">
+            <SectionHeading>New events over time</SectionHeading>
             <EventsOverTimeChart data={stats.overTime} />
           </section>
-          <section className="panel p-5">
-            <h2 className="mb-4 text-sm font-semibold text-content-primary">By category</h2>
+          <section>
+            <SectionHeading>By category</SectionHeading>
             <CategoryBreakdown data={stats.byCategory} />
           </section>
         </div>
 
-        <div className="grid grid-cols-2 gap-6">
-          <section className="panel p-5">
-            <h2 className="mb-4 text-sm font-semibold text-content-primary">By continent</h2>
+        <div className="grid grid-cols-2 gap-12">
+          <section>
+            <SectionHeading>By continent</SectionHeading>
             <ContinentChart data={stats.byContinent} />
           </section>
-          <section className="panel p-5">
-            <h2 className="mb-4 text-sm font-semibold text-content-primary">Recently resolved</h2>
+          <section>
+            <SectionHeading>Recently resolved</SectionHeading>
             {stats.recentlyClosed.length === 0 ? (
-              <p className="py-6 text-center text-sm text-content-tertiary">
-                No recently resolved events.
-              </p>
+              <p className="py-6 text-sm text-content-secondary">No recently resolved events.</p>
             ) : (
-              <ul className="space-y-2.5">
+              <div>
                 {stats.recentlyClosed.map((event) => (
-                  <li key={event.id} className="flex items-center gap-2.5">
-                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-content-tertiary" strokeWidth={1.75} />
-                    <CategoryDot categoryId={event.categoryId} size={7} />
-                    <span className="min-w-0 flex-1 truncate text-sm text-content-secondary">
-                      {event.title}
+                  <div
+                    key={event.id}
+                    className="flex items-baseline justify-between gap-4 border-b border-surface-border py-2.5"
+                  >
+                    <span className="flex min-w-0 items-baseline gap-2 text-sm text-content-primary">
+                      <CategoryDot categoryId={event.categoryId} size={6} />
+                      <span className="truncate">{event.title}</span>
                     </span>
-                    <span className="shrink-0 text-2xs text-content-tertiary">
-                      {event.closed ? formatDateTime(event.closed) : ''}
-                    </span>
-                  </li>
+                    <MetaList
+                      className="shrink-0 text-2xs"
+                      items={[event.closed ? formatDateTime(event.closed) : '']}
+                    />
+                  </div>
                 ))}
-              </ul>
+              </div>
             )}
           </section>
         </div>

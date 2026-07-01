@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { X, MapPin, Clock, ExternalLink, Star, Crosshair } from 'lucide-react'
+import type { ReactNode } from 'react'
 import type { NaturalEvent } from '@shared/models/event'
 import { resolveCategoryMeta } from '@shared/models/category'
 import { eventDurationMs } from '@shared/models/event'
@@ -7,14 +7,18 @@ import { formatCoordinates } from '@shared/utils/geo'
 import { formatDateTime, formatDuration, relativeTime } from '@shared/utils/time'
 import { IconButton } from '../../components/ui/IconButton'
 import { CategoryDot } from '../../components/common/CategoryDot'
+import { Eyebrow } from '../../components/editorial/Eyebrow'
+import { EditorialLink } from '../../components/editorial/EditorialLink'
+import { MetaList } from '../../components/editorial/MetaList'
+import { CloseGlyph } from '../../components/editorial/Glyph'
 import { useBookmarkStore } from '../../state/bookmarkStore'
 import { useUiStore } from '../../state/uiStore'
-import { cn } from '../../utils/cn'
 
 /**
- * The event detail panel. Information is grouped into clear sections — Summary,
- * Location, Timeline, Updates, Resources — so a user is never overwhelmed
- * (CLAUDE.md: Event Detail Panel).
+ * The event detail panel — an opaque, hairline-bordered editorial column
+ * anchored bottom-left so the globe stays the focus and stays interactive.
+ * Information is grouped into ruled sections: Summary, Location, Timeline,
+ * Updates, Resources. No card, no shadow, no icons beyond the drawn close mark.
  */
 export function EventDetailPanel({ event }: { event: NaturalEvent }): JSX.Element {
   const meta = resolveCategoryMeta(event.categoryId)
@@ -27,52 +31,48 @@ export function EventDetailPanel({ event }: { event: NaturalEvent }): JSX.Elemen
 
   return (
     <motion.aside
-      initial={{ x: 24, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      exit={{ x: 24, opacity: 0 }}
-      transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
-      className="pointer-events-auto absolute right-4 top-4 bottom-4 z-10 flex w-[360px] flex-col overflow-hidden panel shadow-panel"
+      initial={{ y: 18, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: 18, opacity: 0 }}
+      transition={{ duration: 0.32, ease: [0.22, 0.61, 0.36, 1] }}
+      className="pointer-events-auto absolute bottom-5 left-5 z-10 flex max-h-[calc(100%-2.5rem)] w-[360px] max-w-[calc(100%-2.5rem)] flex-col overflow-hidden border border-content-primary bg-surface-base"
       aria-label={`Details for ${event.title}`}
     >
-      <header className="flex items-start gap-3 border-b border-surface-border p-4">
-        <CategoryDot categoryId={event.categoryId} size={10} className="mt-1.5" />
-        <div className="min-w-0 flex-1">
-          <h2 className="text-base font-semibold leading-tight text-content-primary">
-            {event.title}
-          </h2>
-          <div className="mt-1 flex items-center gap-2 text-xs text-content-secondary">
-            <span>{meta.label}</span>
-            <span aria-hidden>·</span>
-            <StatusPill active={event.isActive} />
-          </div>
+      <header className="flex items-start justify-between gap-4 border-b border-content-primary px-5 pb-4 pt-4">
+        <div className="min-w-0">
+          <Eyebrow className="flex items-center gap-2">
+            <CategoryDot categoryId={event.categoryId} size={7} />
+            {meta.label} · {event.isActive ? 'Active' : 'Closed'}
+          </Eyebrow>
+          <h2 className="display mt-2 text-2xl leading-tight text-content-primary">{event.title}</h2>
         </div>
         <IconButton label="Close details" onClick={() => selectEvent(null)}>
-          <X className="h-4 w-4" strokeWidth={1.75} />
+          <CloseGlyph />
         </IconButton>
       </header>
 
-      <div className="flex items-center gap-2 border-b border-surface-border p-3">
-        <button
-          type="button"
+      <div className="flex items-center gap-5 border-b border-surface-border px-5 py-3 text-xs">
+        <EditorialLink
+          as="button"
+          arrow
+          underline={false}
+          className="uppercase tracking-meta text-2xs"
           onClick={() => focusEvent(event.id)}
-          className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-accent px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-accent/90"
         >
-          <Crosshair className="h-3.5 w-3.5" strokeWidth={2} />
           Fly to event
-        </button>
-        <IconButton
-          label={bookmarked ? 'Remove bookmark' : 'Bookmark event'}
-          active={bookmarked}
+        </EditorialLink>
+        <EditorialLink
+          as="button"
+          quiet={!bookmarked}
+          underline={false}
+          className="uppercase tracking-meta text-2xs"
           onClick={() => toggleBookmark(event.id)}
         >
-          <Star
-            className={cn('h-4 w-4', bookmarked && 'fill-amber-400 text-amber-400')}
-            strokeWidth={1.75}
-          />
-        </IconButton>
+          {bookmarked ? 'Saved' : 'Save'}
+        </EditorialLink>
       </div>
 
-      <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-4">
+      <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-5">
         {event.description && (
           <Section title="Summary">
             <p className="selectable text-sm leading-relaxed text-content-secondary">
@@ -82,120 +82,82 @@ export function EventDetailPanel({ event }: { event: NaturalEvent }): JSX.Elemen
         )}
 
         <Section title="Location">
-          <Row icon={MapPin} label="Coordinates" value={formatCoordinates(event.position)} />
+          <Row label="Coordinates" value={formatCoordinates(event.position)} />
         </Section>
 
         <Section title="Timeline">
-          <Row icon={Clock} label="First detected" value={formatDateTime(event.firstDetected)} />
-          <Row icon={Clock} label="Latest update" value={formatDateTime(event.latestUpdate)} />
-          <Row
-            icon={Clock}
-            label="Duration"
-            value={formatDuration(eventDurationMs(event))}
-          />
-          {event.closed && (
-            <Row icon={Clock} label="Closed" value={formatDateTime(event.closed)} />
-          )}
+          <Row label="First detected" value={formatDateTime(event.firstDetected)} />
+          <Row label="Latest update" value={formatDateTime(event.latestUpdate)} />
+          <Row label="Duration" value={formatDuration(eventDurationMs(event))} />
+          {event.closed && <Row label="Closed" value={formatDateTime(event.closed)} />}
         </Section>
 
         {updates.length > 1 && (
-          <Section title={`Updates (${updates.length})`}>
-            <ol className="space-y-2">
+          <Section title={`Updates · ${updates.length}`}>
+            <ol className="space-y-2.5">
               {updates.slice(0, 12).map((geometry, index) => (
-                <li key={`${geometry.date}-${index}`} className="flex items-start gap-2.5">
-                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-surface-border" />
-                  <div className="min-w-0">
-                    <p className="text-xs text-content-secondary">
-                      {formatDateTime(geometry.date)}
-                    </p>
-                    <p className="text-2xs text-content-tertiary">
-                      {formatCoordinates(geometry.point)}
-                      {geometry.magnitudeValue != null &&
-                        ` · ${geometry.magnitudeValue} ${geometry.magnitudeUnit ?? ''}`}
-                    </p>
-                  </div>
+                <li key={`${geometry.date}-${index}`} className="border-b border-surface-border pb-2">
+                  <p className="text-xs text-content-primary">{formatDateTime(geometry.date)}</p>
+                  <MetaList
+                    className="mt-0.5 text-2xs"
+                    items={[
+                      formatCoordinates(geometry.point),
+                      geometry.magnitudeValue != null
+                        ? `${geometry.magnitudeValue} ${geometry.magnitudeUnit ?? ''}`.trim()
+                        : ''
+                    ]}
+                  />
                 </li>
               ))}
             </ol>
           </Section>
         )}
 
-        {event.sources.length > 0 && (
-          <Section title="External Resources">
-            <div className="space-y-1.5">
+        {(event.sources.length > 0 || event.link) && (
+          <Section title="External resources">
+            <div className="space-y-2">
               {event.sources.map((source) => (
-                <a
-                  key={source.id}
-                  href={source.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-accent transition-colors hover:bg-surface-hover"
-                >
-                  <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.75} />
-                  <span className="truncate">{source.id}</span>
-                </a>
+                <div key={source.id}>
+                  <EditorialLink href={source.url} target="_blank" rel="noreferrer" arrow className="text-xs">
+                    {source.id}
+                  </EditorialLink>
+                </div>
               ))}
               {event.link && (
-                <a
-                  href={event.link}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-accent transition-colors hover:bg-surface-hover"
-                >
-                  <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.75} />
-                  View on NASA EONET
-                </a>
+                <div>
+                  <EditorialLink href={event.link} target="_blank" rel="noreferrer" arrow className="text-xs">
+                    View on NASA EONET
+                  </EditorialLink>
+                </div>
               )}
             </div>
           </Section>
         )}
       </div>
 
-      <footer className="border-t border-surface-border p-3 text-2xs text-content-tertiary">
-        Source: NASA EONET · last update {relativeTime(event.latestUpdate)}
+      <footer className="border-t border-surface-border px-5 py-2.5">
+        <Eyebrow className="text-[10px]">
+          NASA EONET · updated {relativeTime(event.latestUpdate)}
+        </Eyebrow>
       </footer>
     </motion.aside>
   )
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }): JSX.Element {
+function Section({ title, children }: { title: string; children: ReactNode }): JSX.Element {
   return (
     <section>
-      <h3 className="mb-2 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
-        {title}
-      </h3>
-      <div className="space-y-1.5">{children}</div>
+      <Eyebrow className="mb-2.5">{title}</Eyebrow>
+      <div className="space-y-2">{children}</div>
     </section>
   )
 }
 
-function Row({
-  icon: Icon,
-  label,
-  value
-}: {
-  icon: typeof MapPin
-  label: string
-  value: string
-}): JSX.Element {
+function Row({ label, value }: { label: string; value: string }): JSX.Element {
   return (
-    <div className="flex items-center gap-2.5">
-      <Icon className="h-3.5 w-3.5 shrink-0 text-content-tertiary" strokeWidth={1.75} />
-      <span className="text-xs text-content-tertiary">{label}</span>
-      <span className="selectable ml-auto text-xs text-content-primary">{value}</span>
+    <div className="flex items-baseline justify-between gap-4 text-xs">
+      <span className="text-content-secondary">{label}</span>
+      <span className="selectable tabular text-right text-content-primary">{value}</span>
     </div>
-  )
-}
-
-function StatusPill({ active }: { active: boolean }): JSX.Element {
-  return (
-    <span
-      className={cn(
-        'rounded-full px-1.5 py-0.5 text-2xs font-medium',
-        active ? 'bg-emerald-400/15 text-emerald-300' : 'bg-surface-hover text-content-tertiary'
-      )}
-    >
-      {active ? 'Active' : 'Closed'}
-    </span>
   )
 }

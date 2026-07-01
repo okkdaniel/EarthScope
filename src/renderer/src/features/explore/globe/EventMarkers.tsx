@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { memo, useEffect, useMemo, useRef } from 'react'
 import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber'
 import {
-  AdditiveBlending,
   BufferGeometry,
   Float32BufferAttribute,
+  NormalBlending,
   Points,
   ShaderMaterial
 } from 'three'
@@ -11,22 +11,27 @@ import type { NaturalEvent } from '@shared/models/event'
 import { latLngToVector3 } from '@shared/utils/geo'
 import { markerVisualFor } from './markerVisuals'
 import { markerFragmentShader, markerVertexShader } from './shaders/markerShader'
-import { GLOBE_RADIUS } from './globeConstants'
+import { MARKER_RADIUS } from './globeConstants'
 import { useSettingsStore } from '../../../state/settingsStore'
 
 interface EventMarkersProps {
   events: NaturalEvent[]
   onSelect: (id: string) => void
+  /** Reports the hovered event (or null) so a parent can show a tooltip. */
+  onHover?: (event: NaturalEvent | null) => void
 }
 
-const MARKER_RADIUS = GLOBE_RADIUS * 1.012
-
 /**
- * Renders every visible event as a single GPU point cloud — one draw call for
- * hundreds of markers. Per-vertex attributes drive the per-category animated
- * shader, and clicks are resolved back to an event id via the hit index.
+ * Renders individual (non-clustered) events as a single GPU point cloud — one
+ * draw call for hundreds of markers. Per-vertex attributes drive the
+ * per-category animated shader; clicks and hovers resolve back to an event via
+ * the hit index.
  */
-export function EventMarkers({ events, onSelect }: EventMarkersProps): JSX.Element | null {
+export const EventMarkers = memo(function EventMarkers({
+  events,
+  onSelect,
+  onHover
+}: EventMarkersProps): JSX.Element | null {
   const pointsRef = useRef<Points>(null)
   const materialRef = useRef<ShaderMaterial>(null)
   const raycaster = useThree((s) => s.raycaster)
@@ -87,7 +92,7 @@ export function EventMarkers({ events, onSelect }: EventMarkersProps): JSX.Eleme
         fragmentShader: markerFragmentShader,
         transparent: true,
         depthWrite: false,
-        blending: AdditiveBlending,
+        blending: NormalBlending,
         uniforms: {
           uTime: { value: 0 },
           uPixelRatio: { value: Math.min(gl.getPixelRatio(), 2) },
@@ -112,11 +117,35 @@ export function EventMarkers({ events, onSelect }: EventMarkersProps): JSX.Eleme
     if (hit) onSelect(hit.id)
   }
 
+  const handleMove = (event: ThreeEvent<PointerEvent>): void => {
+    if (event.index == null) return
+    event.stopPropagation()
+    const hit = events[event.index]
+    if (hit) {
+      document.body.style.cursor = 'pointer'
+      onHover?.(hit)
+    }
+  }
+
+  const handleOut = (): void => {
+    document.body.style.cursor = ''
+    onHover?.(null)
+  }
+
+  // Reset the cursor if this layer unmounts while hovered.
+  useEffect(() => () => void (document.body.style.cursor = ''), [])
+
   if (events.length === 0) return null
 
   return (
-    <points ref={pointsRef} geometry={geometry} onClick={handleClick}>
+    <points
+      ref={pointsRef}
+      geometry={geometry}
+      onClick={handleClick}
+      onPointerMove={handleMove}
+      onPointerOut={handleOut}
+    >
       <primitive object={material} ref={materialRef} attach="material" />
     </points>
   )
-}
+})

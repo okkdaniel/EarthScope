@@ -1,46 +1,43 @@
-import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import type { NamedCount } from '@shared/services/aggregate'
 
-const BAR_COLOR = '#4c8bf5'
+const INK = '#0a0a0a'
+const QUIET = '#6b6b68'
 
-/** Horizontal bar chart of events grouped by approximate continent. */
+/** Events by approximate continent, as ink bars — monochrome, square corners. */
 export function ContinentChart({ data }: { data: NamedCount[] }): JSX.Element {
   if (data.length === 0) {
-    return <p className="py-6 text-center text-sm text-content-tertiary">No regional data.</p>
+    return <p className="py-6 text-sm text-content-secondary">No regional data.</p>
   }
 
   return (
-    <ResponsiveContainer width="100%" height={Math.max(160, data.length * 34)}>
+    <ResponsiveContainer width="100%" height={Math.max(160, data.length * 36)}>
       <BarChart
         data={data}
         layout="vertical"
         margin={{ top: 0, right: 12, left: 8, bottom: 0 }}
-        barCategoryGap={10}
+        barCategoryGap={12}
       >
         <XAxis type="number" hide allowDecimals={false} />
         <YAxis
           type="category"
           dataKey="name"
-          tick={{ fill: '#9aa3af', fontSize: 12 }}
+          tick={{ fill: QUIET, fontSize: 12 }}
           axisLine={false}
           tickLine={false}
-          width={96}
+          width={104}
         />
         <Tooltip
-          cursor={{ fill: '#1a1e25' }}
+          cursor={{ fill: '#efefec' }}
           contentStyle={{
-            background: '#1a1e25',
-            border: '1px solid #2a2f38',
-            borderRadius: 10,
+            background: '#f4f4f2',
+            border: '1px solid #0a0a0a',
+            borderRadius: 0,
             fontSize: 12,
-            color: '#e7ebf0'
+            color: '#0a0a0a'
           }}
         />
-        <Bar dataKey="count" radius={[0, 6, 6, 0]} animationDuration={600}>
-          {data.map((entry) => (
-            <Cell key={entry.name} fill={BAR_COLOR} />
-          ))}
-        </Bar>
+        <Bar dataKey="count" fill={INK} radius={0} animationDuration={600} barSize={10} />
       </BarChart>
     </ResponsiveContainer>
   )

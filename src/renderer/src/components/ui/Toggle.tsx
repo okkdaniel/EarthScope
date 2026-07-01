@@ -6,7 +6,10 @@ interface ToggleProps {
   label: string
 }
 
-/** An accessible switch control. */
+/**
+ * A square hairline toggle that fills with ink when on — no pill, no colour.
+ * Reads like a checkbox on an engineering form.
+ */
 export function Toggle({ checked, onChange, label }: ToggleProps): JSX.Element {
   return (
     <button
@@ -16,16 +19,15 @@ export function Toggle({ checked, onChange, label }: ToggleProps): JSX.Element {
       aria-label={label}
       onClick={() => onChange(!checked)}
       className={cn(
-        'relative h-5 w-9 shrink-0 rounded-full transition-colors duration-200 ease-out-soft',
-        checked ? 'bg-accent' : 'bg-surface-hover'
+        'flex h-4 w-4 items-center justify-center border transition-colors duration-200 ease-quiet',
+        checked ? 'border-content-primary bg-content-primary' : 'border-content-tertiary bg-transparent'
       )}
     >
-      <span
-        className={cn(
-          'absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform duration-200 ease-out-soft',
-          checked ? 'translate-x-4' : 'translate-x-0.5'
-        )}
-      />
+      {checked && (
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden>
+          <path d="M2 5l2 2 4-5" stroke="var(--paper-100)" strokeWidth="1" />
+        </svg>
+      )}
     </button>
   )
 }

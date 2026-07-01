@@ -1,54 +1,54 @@
-import { Globe2, Github, ExternalLink } from 'lucide-react'
 import { ViewHeader } from '../../components/common/ViewHeader'
+import { SectionHeading } from '../../components/editorial/SectionHeading'
+import { EditorialLink } from '../../components/editorial/EditorialLink'
+import { Eyebrow } from '../../components/editorial/Eyebrow'
+import { ContourMark } from '../../components/editorial/ContourMark'
+import { AnuraLogo } from '../../components/editorial/AnuraLogo'
 import { useAppInfo } from '../../hooks/useAppInfo'
 
 /**
- * About & attribution. Credits the NASA EONET data source, as required for
- * responsible use of the API, and surfaces runtime versions for support.
+ * About & attribution. Credits the NASA EONET data source (required for
+ * responsible API use) and lists runtime versions, set as an editorial spread.
  */
 export function AboutView(): JSX.Element {
   const info = useAppInfo()
 
   return (
-    <div className="h-full overflow-y-auto">
-      <ViewHeader title="About" />
+    <div className="relative h-full overflow-y-auto">
+      <ContourMark
+        className="absolute bottom-0 left-0 w-[680px]"
+        style={{ transform: 'translate(-26%, 30%)' }}
+      />
 
-      <div className="mx-auto max-w-2xl space-y-6 px-8 pb-12">
-        <div className="panel flex items-center gap-4 p-6">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-accent/15">
-            <Globe2 className="h-7 w-7 text-accent" strokeWidth={1.5} />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-content-primary">EarthScope</h2>
-            <p className="text-sm text-content-secondary">
-              Explore real-time natural events across Earth.
-            </p>
-            <p className="mt-1 text-xs text-content-tertiary">
-              Version {info?.version ?? '—'}
-            </p>
-          </div>
-        </div>
+      <ViewHeader eyebrow="Colophon" title="About" />
 
-        <section className="panel p-6">
-          <h3 className="mb-2 text-sm font-semibold text-content-primary">Data & attribution</h3>
-          <p className="text-sm leading-relaxed text-content-secondary">
+      <div className="relative mx-auto max-w-2xl space-y-14 px-10 pb-16 pt-10">
+        <section>
+          <h2 className="display text-5xl leading-none tracking-display-tight text-content-primary">
+            EarthScope
+          </h2>
+          <p className="mt-4 max-w-md text-base leading-relaxed text-content-secondary">
+            A desktop instrument for exploring real-time natural events across Earth.
+          </p>
+          <Eyebrow className="mt-4">Version {info?.version ?? '—'}</Eyebrow>
+        </section>
+
+        <section>
+          <SectionHeading>Data &amp; attribution</SectionHeading>
+          <p className="max-w-lg text-sm leading-relaxed text-content-secondary">
             Event data is provided by NASA&apos;s Earth Observatory Natural Event Tracker (EONET).
             EarthScope is an independent project and is not affiliated with or endorsed by NASA.
           </p>
-          <a
-            href="https://eonet.gsfc.nasa.gov"
-            target="_blank"
-            rel="noreferrer"
-            className="mt-3 inline-flex items-center gap-1.5 text-xs text-accent hover:text-accent/80"
-          >
-            <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.75} />
-            eonet.gsfc.nasa.gov
-          </a>
+          <div className="mt-4">
+            <EditorialLink href="https://eonet.gsfc.nasa.gov" target="_blank" rel="noreferrer" arrow>
+              eonet.gsfc.nasa.gov
+            </EditorialLink>
+          </div>
         </section>
 
-        <section className="panel p-6">
-          <h3 className="mb-3 text-sm font-semibold text-content-primary">Runtime</h3>
-          <dl className="grid grid-cols-2 gap-x-8 gap-y-2 text-xs">
+        <section>
+          <SectionHeading>Runtime</SectionHeading>
+          <dl className="grid grid-cols-2 gap-x-12 gap-y-2.5 text-sm">
             <InfoRow label="Platform" value={info?.platform ?? '—'} />
             <InfoRow label="Electron" value={info?.electron ?? '—'} />
             <InfoRow label="Chromium" value={info?.chrome ?? '—'} />
@@ -56,15 +56,17 @@ export function AboutView(): JSX.Element {
           </dl>
         </section>
 
-        <a
-          href="https://github.com/earthscope-app/earthscope"
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-2 text-xs text-content-secondary hover:text-content-primary"
-        >
-          <Github className="h-4 w-4" strokeWidth={1.75} />
-          View source on GitHub
-        </a>
+        <section>
+          <EditorialLink
+            href="https://github.com/earthscope-app/earthscope"
+            target="_blank"
+            rel="noreferrer"
+            quiet
+            arrow
+          >
+            View source on GitHub
+          </EditorialLink>
+        </section>
       </div>
     </div>
   )
@@ -72,9 +74,9 @@ export function AboutView(): JSX.Element {
 
 function InfoRow({ label, value }: { label: string; value: string }): JSX.Element {
   return (
-    <div className="flex justify-between border-b border-surface-border/60 py-1.5">
-      <dt className="text-content-tertiary">{label}</dt>
-      <dd className="selectable font-mono text-content-secondary">{value}</dd>
+    <div className="flex items-baseline justify-between border-b border-surface-border py-2">
+      <dt className="text-content-secondary">{label}</dt>
+      <dd className="selectable tabular font-mono text-xs text-content-primary">{value}</dd>
     </div>
   )
 }

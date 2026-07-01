@@ -14,7 +14,7 @@ export function createMainWindow(): BrowserWindow {
     minWidth: 1024,
     minHeight: 680,
     show: false,
-    backgroundColor: '#0b0d10',
+    backgroundColor: '#f4f4f2',
     title: 'EarthScope',
     titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
     autoHideMenuBar: true,

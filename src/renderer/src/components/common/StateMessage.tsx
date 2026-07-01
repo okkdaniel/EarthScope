@@ -1,9 +1,9 @@
-import type { LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { cn } from '../../utils/cn'
+import { Eyebrow } from '../editorial/Eyebrow'
 
 interface StateMessageProps {
-  icon: LucideIcon
+  eyebrow?: string
   title: string
   description?: string
   action?: ReactNode
@@ -11,35 +11,30 @@ interface StateMessageProps {
 }
 
 /**
- * A shared component for empty, error and offline states. Every empty screen
- * explains why it's empty and what to do next (CLAUDE.md: Empty States).
+ * Empty, error and offline states in the editorial voice: an eyebrow over a
+ * serif title and a quiet explanation of why the screen is empty and what to do
+ * next. No icon, no illustration.
  */
 export function StateMessage({
-  icon: Icon,
+  eyebrow = 'No data',
   title,
   description,
   action,
   className
-}: StateMessageProps) {
+}: StateMessageProps): JSX.Element {
   return (
     <div
       className={cn(
-        'flex h-full flex-col items-center justify-center gap-3 px-8 text-center',
+        'flex h-full flex-col items-center justify-center gap-3 px-10 text-center',
         className
       )}
     >
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-hover">
-        <Icon className="h-5 w-5 text-content-tertiary" strokeWidth={1.75} />
-      </div>
-      <div className="space-y-1">
-        <h3 className="text-sm font-medium text-content-primary">{title}</h3>
-        {description && (
-          <p className="mx-auto max-w-xs text-xs leading-relaxed text-content-secondary">
-            {description}
-          </p>
-        )}
-      </div>
-      {action && <div className="mt-1">{action}</div>}
+      <Eyebrow>{eyebrow}</Eyebrow>
+      <h3 className="display text-2xl leading-tight text-content-primary">{title}</h3>
+      {description && (
+        <p className="max-w-xs text-sm leading-relaxed text-content-secondary">{description}</p>
+      )}
+      {action && <div className="mt-2">{action}</div>}
     </div>
   )
 }

@@ -1,15 +1,14 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { RefreshCw, Wifi, WifiOff, Circle } from 'lucide-react'
 import { relativeTime } from '@shared/utils/time'
 import { EVENTS_QUERY_KEY, useEvents } from '../../hooks/useEvents'
 import { useOnlineStatus } from '../../hooks/useOnlineStatus'
 import { useFilteredEvents } from '../../hooks/useFilteredEvents'
-import { cn } from '../../utils/cn'
+import { EditorialLink } from '../editorial/EditorialLink'
 
 /**
- * A quiet status strip along the bottom edge: connectivity, data freshness,
- * result counts and a manual refresh. Communicates state without competing with
- * the globe.
+ * A quiet status strip along the bottom edge: connectivity, freshness, counts
+ * and a manual refresh — set as uppercase tracked metadata joined by middle
+ * dots. No icons, no colour; it never competes with the globe.
  */
 export function StatusBar(): JSX.Element {
   const online = useOnlineStatus()
@@ -20,42 +19,41 @@ export function StatusBar(): JSX.Element {
   const activeCount = all.filter((event) => event.isActive).length
   const isRefreshing = query.isFetching
 
+  const shown =
+    filtered.length === all.length ? `${all.length} events` : `${filtered.length} of ${all.length}`
+
   return (
-    <footer className="flex h-8 shrink-0 items-center gap-4 border-t border-surface-border bg-surface-raised px-4 text-2xs text-content-tertiary">
-      <span className="flex items-center gap-1.5">
-        {online ? (
-          <Wifi className="h-3 w-3 text-emerald-400" strokeWidth={2} />
-        ) : (
-          <WifiOff className="h-3 w-3 text-amber-400" strokeWidth={2} />
-        )}
-        {online ? 'Online' : 'Offline'}
-      </span>
+    <footer className="flex h-9 shrink-0 items-center gap-3 border-t border-surface-border px-10 text-2xs tracking-meta text-content-secondary">
+      <span className="uppercase">{online ? 'Online' : 'Offline'}</span>
+      <Dot />
+      <span className="tabular uppercase">{activeCount} active</span>
+      <Dot />
+      <span className="tabular uppercase">{shown}</span>
 
-      <span className="flex items-center gap-1.5">
-        <Circle className="h-2 w-2 fill-emerald-400 text-emerald-400" />
-        {activeCount} active
-      </span>
-
-      <span>
-        {filtered.length === all.length
-          ? `${all.length} events`
-          : `${filtered.length} of ${all.length} shown`}
-      </span>
-
-      <div className="ml-auto flex items-center gap-3">
-        {fromCache && <span className="text-amber-400">Showing cached data</span>}
-        {fetchedAt && <span>Updated {relativeTime(fetchedAt)}</span>}
-        <button
-          type="button"
+      <div className="ml-auto flex items-center gap-3 uppercase">
+        {fromCache && <span className="text-content-tertiary">Cached data</span>}
+        {fetchedAt && !fromCache && <span className="tabular">Updated {relativeTime(fetchedAt)}</span>}
+        {fetchedAt && fromCache && <Dot />}
+        <EditorialLink
+          as="button"
+          underline={false}
+          quiet
+          arrow
           onClick={() => queryClient.invalidateQueries({ queryKey: EVENTS_QUERY_KEY })}
           disabled={isRefreshing}
-          className="flex items-center gap-1.5 rounded px-1.5 py-0.5 transition-colors hover:text-content-secondary disabled:opacity-60"
-          aria-label="Refresh events"
+          className="tracking-meta uppercase disabled:opacity-40"
         >
-          <RefreshCw className={cn('h-3 w-3', isRefreshing && 'animate-spin')} strokeWidth={2} />
-          Refresh
-        </button>
+          {isRefreshing ? 'Refreshing' : 'Refresh'}
+        </EditorialLink>
       </div>
     </footer>
+  )
+}
+
+function Dot(): JSX.Element {
+  return (
+    <span aria-hidden className="text-content-tertiary">
+      ·
+    </span>
   )
 }

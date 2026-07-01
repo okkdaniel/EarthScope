@@ -16,20 +16,22 @@ storms, floods and more on a calm, interactive globe — powered by NASA's
 
 ## Overview
 
-EarthScope is a native desktop app (Electron + React + TypeScript) designed to feel
-like professional engineering software — think Linear, Arc, or FlightRadar24 — not a
-web page wrapped in a shell. A vector-style globe is the centrepiece; every other
-surface (dashboard, timeline, analytics) exists to help you understand what is
-happening on it.
+EarthScope is a native desktop app (Electron + React + TypeScript). Its interface
+follows an **editorial print design system** — a warm-gray canvas, near-black ink, two
+typefaces (Cormorant Garamond for display, Inter for text), hairline rules, and no
+cards, shadows, rounded corners or colour accents. Emphasis comes from scale and weight,
+not chrome. A survey-style globe is the centrepiece; every other surface (dashboard,
+timeline, analytics) exists to help you understand what is happening on it. Colour is
+reserved entirely for one thing: the natural events themselves.
 
 ## Features
 
-- **Interactive vector globe** — a calm, readable Earth with thin coastlines and
-  country borders, a soft atmosphere, and a starfield. Inertial rotation, zoom, and
-  smooth "fly-to" camera transitions.
-- **Live event visualisation** — hundreds of events rendered in a single GPU draw
-  call, each category with its own animated visual language (ember flicker, rotating
-  storm, expanding flood ripple, …).
+- **Interactive survey globe** — a calm warm-paper Earth carrying thin ink coastlines,
+  quieter country borders and a faint graticule — the same ink-on-warm-gray iso-line
+  language as the brand contour mark. Inertial rotation, zoom, and smooth "fly-to"
+  camera transitions.
+- **Live event visualisation** — hundreds of events rendered in a single GPU draw call
+  as precise category-coloured annotation dots that cluster when they overlap.
 - **Dashboard** — an at-a-glance overview of global activity with recent events and a
   category breakdown.
 - **Explore** — a docked event list, instant filtering, and a detail panel with
@@ -49,7 +51,8 @@ happening on it.
 | Shell          | Electron 31                                       |
 | UI             | React 18 + TypeScript (strict)                    |
 | Build          | Vite via `electron-vite`                          |
-| Styling        | Tailwind CSS                                       |
+| Styling        | Tailwind CSS (editorial token theme)              |
+| Typefaces      | Cormorant Garamond + Inter (bundled `@fontsource`)|
 | 3D             | Three.js + React Three Fiber + drei               |
 | Motion         | Framer Motion                                     |
 | State          | Zustand                                            |

@@ -3,11 +3,13 @@ import type { AppSettings, DistanceUnit, ThemeMode } from '@shared/models/settin
 import { ViewHeader } from '../../components/common/ViewHeader'
 import { SettingRow } from '../../components/ui/SettingRow'
 import { Toggle } from '../../components/ui/Toggle'
+import { Eyebrow } from '../../components/editorial/Eyebrow'
 import { useSettingsStore } from '../../state/settingsStore'
+import { cn } from '../../utils/cn'
 
 /**
- * Settings. Grouped into clear sections and persisted immediately on change via
- * the settings store, which round-trips to the main process.
+ * Settings. Grouped into ruled sections with editorial controls — hairline
+ * selects, ink toggles, underlined segment choices. Persisted on change.
  */
 export function SettingsView(): JSX.Element {
   const settings = useSettingsStore((s) => s.settings)
@@ -19,14 +21,11 @@ export function SettingsView(): JSX.Element {
 
   return (
     <div className="h-full overflow-y-auto">
-      <ViewHeader title="Settings" subtitle="Tune EarthScope to the way you work." />
+      <ViewHeader eyebrow="Preferences" title="Settings" subtitle="Tune EarthScope to the way you work." />
 
-      <div className="mx-auto max-w-2xl space-y-8 px-8 pb-12">
-        <SettingsSection title="Data">
-          <SettingRow
-            title="Auto-refresh interval"
-            description="How often EarthScope checks for new events."
-          >
+      <div className="mx-auto max-w-2xl space-y-12 px-10 pb-16 pt-10">
+        <Section title="Data">
+          <SettingRow title="Auto-refresh interval" description="How often EarthScope checks for new events.">
             <NumberSelect
               value={settings.refreshIntervalMinutes}
               onChange={(v) => set('refreshIntervalMinutes', v)}
@@ -51,20 +50,9 @@ export function SettingsView(): JSX.Element {
               ]}
             />
           </SettingRow>
-        </SettingsSection>
+        </Section>
 
-        <SettingsSection title="Appearance">
-          <SettingRow title="Theme" description="Dark is the default and recommended.">
-            <Segmented<ThemeMode>
-              value={settings.theme}
-              onChange={(v) => set('theme', v)}
-              options={[
-                { value: 'dark', label: 'Dark' },
-                { value: 'light', label: 'Light' },
-                { value: 'system', label: 'System' }
-              ]}
-            />
-          </SettingRow>
+        <Section title="Appearance">
           <SettingRow title="Units" description="Distance and measurement units.">
             <Segmented<DistanceUnit>
               value={settings.units}
@@ -75,10 +63,17 @@ export function SettingsView(): JSX.Element {
               ]}
             />
           </SettingRow>
-          <SettingRow
-            title="Animation speed"
-            description="Global multiplier for event and UI motion."
-          >
+          <SettingRow title="Theme" description="EarthScope uses a single warm editorial palette.">
+            <Segmented<ThemeMode>
+              value={settings.theme}
+              onChange={(v) => set('theme', v)}
+              options={[
+                { value: 'light', label: 'Paper' },
+                { value: 'system', label: 'System' }
+              ]}
+            />
+          </SettingRow>
+          <SettingRow title="Animation speed" description="Global multiplier for event and UI motion.">
             <RangeControl
               min={0}
               max={2}
@@ -88,17 +83,17 @@ export function SettingsView(): JSX.Element {
               format={(v) => (v === 0 ? 'Off' : `${v}×`)}
             />
           </SettingRow>
-        </SettingsSection>
+        </Section>
 
-        <SettingsSection title="Globe">
-          <SettingRow title="Atmosphere glow" description="Soft halo around the planet.">
+        <Section title="Globe">
+          <SettingRow title="Atmosphere" description="A faint hairline halo at the limb.">
             <Toggle
-              label="Atmosphere glow"
+              label="Atmosphere"
               checked={settings.showAtmosphere}
               onChange={(v) => set('showAtmosphere', v)}
             />
           </SettingRow>
-          <SettingRow title="Idle auto-rotation" description="Gently spin the globe when idle.">
+          <SettingRow title="Idle auto-rotation" description="Gently rotate the globe when idle.">
             <RangeControl
               min={0}
               max={1}
@@ -118,9 +113,9 @@ export function SettingsView(): JSX.Element {
               format={(v) => `${v}×`}
             />
           </SettingRow>
-        </SettingsSection>
+        </Section>
 
-        <SettingsSection title="Notifications">
+        <Section title="Notifications">
           <SettingRow
             title="Desktop notifications"
             description="Alert me when notable new events are detected."
@@ -131,9 +126,9 @@ export function SettingsView(): JSX.Element {
               onChange={(v) => set('notificationsEnabled', v)}
             />
           </SettingRow>
-        </SettingsSection>
+        </Section>
 
-        <SettingsSection title="Privacy">
+        <Section title="Privacy">
           <SettingRow
             title="Anonymous telemetry"
             description="Disabled by default. Helps improve EarthScope. No personal data."
@@ -144,24 +139,16 @@ export function SettingsView(): JSX.Element {
               onChange={(v) => set('telemetryEnabled', v)}
             />
           </SettingRow>
-        </SettingsSection>
+        </Section>
       </div>
     </div>
   )
 }
 
-function SettingsSection({
-  title,
-  children
-}: {
-  title: string
-  children: React.ReactNode
-}): JSX.Element {
+function Section({ title, children }: { title: string; children: React.ReactNode }): JSX.Element {
   return (
     <section>
-      <h2 className="mb-1 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
-        {title}
-      </h2>
+      <Eyebrow className="mb-1 border-b border-surface-border pb-2">{title}</Eyebrow>
       <div className="divide-y divide-surface-border">{children}</div>
     </section>
   )
@@ -180,7 +167,7 @@ function NumberSelect({
     <select
       value={value}
       onChange={(e: ChangeEvent<HTMLSelectElement>) => onChange(Number(e.target.value))}
-      className="h-9 rounded-lg border border-surface-border bg-surface-base px-3 text-sm text-content-primary focus:border-accent/50"
+      className="cursor-pointer appearance-none border-b border-content-primary bg-transparent pb-0.5 pr-4 text-sm text-content-primary"
     >
       {options.map((option) => (
         <option key={option.value} value={option.value}>
@@ -201,18 +188,25 @@ function Segmented<T extends string>({
   options: { value: T; label: string }[]
 }): JSX.Element {
   return (
-    <div className="flex rounded-lg border border-surface-border bg-surface-base p-0.5">
-      {options.map((option) => (
-        <button
-          key={option.value}
-          type="button"
-          onClick={() => onChange(option.value)}
-          data-active={value === option.value}
-          className="rounded-md px-3 py-1 text-xs font-medium text-content-secondary transition-colors data-[active=true]:bg-surface-hover data-[active=true]:text-content-primary"
-        >
-          {option.label}
-        </button>
-      ))}
+    <div className="flex items-baseline gap-4">
+      {options.map((option) => {
+        const active = value === option.value
+        return (
+          <button
+            key={option.value}
+            type="button"
+            onClick={() => onChange(option.value)}
+            className={cn(
+              'text-xs uppercase tracking-meta hover-fade',
+              active
+                ? 'border-b border-content-primary pb-0.5 text-content-primary'
+                : 'text-content-secondary'
+            )}
+          >
+            {option.label}
+          </button>
+        )
+      })}
     </div>
   )
 }
@@ -241,11 +235,9 @@ function RangeControl({
         step={step}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-32 accent-accent"
+        className="w-32 accent-content-primary"
       />
-      <span className="w-10 text-right text-xs tabular-nums text-content-secondary">
-        {format(value)}
-      </span>
+      <span className="tabular w-10 text-right text-xs text-content-secondary">{format(value)}</span>
     </div>
   )
 }

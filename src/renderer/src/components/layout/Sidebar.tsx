@@ -1,38 +1,29 @@
-import {
-  Globe2,
-  LayoutDashboard,
-  Clock,
-  BarChart3,
-  Settings,
-  Info,
-  Search,
-  type LucideIcon
-} from 'lucide-react'
 import { useUiStore, type ViewId } from '../../state/uiStore'
+import { Eyebrow } from '../editorial/Eyebrow'
+import { AnuraLogo } from '../editorial/AnuraLogo'
 import { cn } from '../../utils/cn'
 
 interface NavEntry {
   id: ViewId
   label: string
-  icon: LucideIcon
 }
 
 const PRIMARY_NAV: NavEntry[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'explore', label: 'Explore', icon: Globe2 },
-  { id: 'timeline', label: 'Timeline', icon: Clock },
-  { id: 'analytics', label: 'Analytics', icon: BarChart3 }
+  { id: 'dashboard', label: 'Dashboard' },
+  { id: 'explore', label: 'Explore' },
+  { id: 'timeline', label: 'Timeline' },
+  { id: 'analytics', label: 'Analytics' }
 ]
 
 const SECONDARY_NAV: NavEntry[] = [
-  { id: 'settings', label: 'Settings', icon: Settings },
-  { id: 'about', label: 'About', icon: Info }
+  { id: 'settings', label: 'Settings' },
+  { id: 'about', label: 'About' }
 ]
 
 /**
- * The primary navigation rail. Two flat levels only (CLAUDE.md: never exceed
- * two nav levels). The globe/Explore is the visual centre of the product, so
- * navigation stays deliberately quiet beside it.
+ * The navigation rail. No icons, no pills — a serif wordmark over uppercase
+ * tracked links, emphasis carried by ink weight and a leading rule on the
+ * active item. Two flat levels only.
  */
 export function Sidebar(): JSX.Element {
   const view = useUiStore((s) => s.view)
@@ -42,43 +33,43 @@ export function Sidebar(): JSX.Element {
   return (
     <nav
       aria-label="Primary"
-      className="flex w-56 shrink-0 flex-col gap-1 border-r border-surface-border bg-surface-raised px-3 py-4"
+      className="flex w-60 shrink-0 flex-col border-r border-surface-border px-8 py-9"
     >
-      <div className="flex items-center gap-2.5 px-2 pb-4">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent/15">
-          <Globe2 className="h-4.5 w-4.5 text-accent" strokeWidth={1.75} />
+      <div className="mb-10 flex items-center gap-3">
+        <AnuraLogo size={26} />
+        <div>
+          <div className="display text-2xl leading-none tracking-display text-content-primary">
+            EarthScope
+          </div>
+          <Eyebrow className="mt-1.5 text-[10px]">by Anura</Eyebrow>
         </div>
-        <span className="text-sm font-semibold tracking-tight">EarthScope</span>
       </div>
 
       <button
         type="button"
         onClick={openCommandPalette}
-        className="mb-3 flex items-center gap-2 rounded-lg border border-surface-border bg-surface-base px-3 py-2 text-xs text-content-tertiary transition-colors hover:border-surface-hover hover:text-content-secondary"
+        className="mb-8 flex items-baseline justify-between text-content-secondary hover-fade"
       >
-        <Search className="h-3.5 w-3.5" strokeWidth={1.75} />
-        <span>Search events</span>
-        <kbd className="ml-auto rounded border border-surface-border bg-surface-raised px-1.5 py-0.5 text-2xs font-medium text-content-tertiary">
-          ⌘K
-        </kbd>
+        <span className="text-sm">Search events</span>
+        <kbd className="font-sans text-2xs tracking-meta text-content-tertiary">⌘K</kbd>
       </button>
 
-      <div className="flex flex-col gap-0.5">
+      <ul className="flex flex-col gap-1">
         {PRIMARY_NAV.map((entry) => (
-          <NavButton key={entry.id} entry={entry} active={view === entry.id} onSelect={setView} />
+          <NavRow key={entry.id} entry={entry} active={view === entry.id} onSelect={setView} />
         ))}
-      </div>
+      </ul>
 
-      <div className="mt-auto flex flex-col gap-0.5 border-t border-surface-border pt-3">
+      <ul className="mt-auto flex flex-col gap-1 border-t border-surface-border pt-5">
         {SECONDARY_NAV.map((entry) => (
-          <NavButton key={entry.id} entry={entry} active={view === entry.id} onSelect={setView} />
+          <NavRow key={entry.id} entry={entry} active={view === entry.id} onSelect={setView} />
         ))}
-      </div>
+      </ul>
     </nav>
   )
 }
 
-function NavButton({
+function NavRow({
   entry,
   active,
   onSelect
@@ -87,17 +78,28 @@ function NavButton({
   active: boolean
   onSelect: (id: ViewId) => void
 }): JSX.Element {
-  const Icon = entry.icon
   return (
-    <button
-      type="button"
-      onClick={() => onSelect(entry.id)}
-      data-active={active}
-      aria-current={active ? 'page' : undefined}
-      className={cn('nav-item', 'w-full text-left')}
-    >
-      <Icon className="h-4 w-4" strokeWidth={1.75} />
-      <span>{entry.label}</span>
-    </button>
+    <li>
+      <button
+        type="button"
+        onClick={() => onSelect(entry.id)}
+        aria-current={active ? 'page' : undefined}
+        className={cn(
+          'group relative flex w-full items-center py-1.5 text-left text-[13px] tracking-meta transition-colors duration-200 ease-quiet',
+          active ? 'text-content-primary' : 'text-content-secondary hover:text-content-primary'
+        )}
+        style={{ textTransform: 'uppercase' }}
+      >
+        {/* A short ink rule marks the active item — no pill, no fill. */}
+        <span
+          aria-hidden
+          className={cn(
+            'absolute -left-8 h-px w-4 bg-content-primary transition-opacity duration-200',
+            active ? 'opacity-100' : 'opacity-0'
+          )}
+        />
+        {entry.label}
+      </button>
+    </li>
   )
 }

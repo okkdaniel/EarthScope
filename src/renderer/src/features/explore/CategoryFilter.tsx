@@ -1,13 +1,13 @@
+import { useMemo } from 'react'
 import { CATEGORY_LIST } from '@shared/models/category'
 import type { NaturalEvent } from '@shared/models/event'
-import { useMemo } from 'react'
 import { useFilterStore } from '../../state/filterStore'
 import { cn } from '../../utils/cn'
 
 /**
- * Category toggles. Selecting none means "show everything" — a common, forgiving
- * default. Each chip shows the live count so users understand the data at a
- * glance. Multiple categories combine (OR) as required by the spec.
+ * Category filters as uppercase tracked toggles — no pills, no chip fills. The
+ * active category is marked by ink weight and an underline; a small colour dot
+ * carries the category (the one data mark). Selecting none shows everything.
  */
 export function CategoryFilter({ events }: { events: NaturalEvent[] }): JSX.Element {
   const selected = useFilterStore((s) => s.categories)
@@ -23,15 +23,15 @@ export function CategoryFilter({ events }: { events: NaturalEvent[] }): JSX.Elem
   }, [events])
 
   return (
-    <div className="flex flex-wrap gap-1.5">
+    <div className="flex flex-wrap gap-x-4 gap-y-2 text-2xs uppercase tracking-meta">
       <button
         type="button"
         onClick={clear}
-        data-active={selected.size === 0}
         className={cn(
-          'rounded-full border border-surface-border px-2.5 py-1 text-2xs font-medium',
-          'text-content-secondary transition-colors hover:border-surface-hover',
-          'data-[active=true]:border-accent/50 data-[active=true]:bg-accent-soft data-[active=true]:text-content-primary'
+          'hover-fade',
+          selected.size === 0
+            ? 'border-b border-content-primary pb-0.5 text-content-primary'
+            : 'text-content-secondary'
         )}
       >
         All
@@ -45,25 +45,20 @@ export function CategoryFilter({ events }: { events: NaturalEvent[] }): JSX.Elem
             key={category.id}
             type="button"
             onClick={() => toggle(category.id)}
-            data-active={isActive}
             className={cn(
-              'flex items-center gap-1.5 rounded-full border border-surface-border px-2.5 py-1',
-              'text-2xs font-medium text-content-secondary transition-colors hover:border-surface-hover',
-              'data-[active=true]:text-content-primary'
-            )}
-            style={
+              'inline-flex items-baseline gap-1.5 hover-fade',
               isActive
-                ? { borderColor: `${category.color}80`, backgroundColor: `${category.color}1f` }
-                : undefined
-            }
+                ? 'border-b border-content-primary pb-0.5 text-content-primary'
+                : 'text-content-secondary'
+            )}
           >
             <span
-              className="h-2 w-2 rounded-full"
+              className="h-1.5 w-1.5 translate-y-px rounded-full"
               style={{ backgroundColor: category.color }}
-              aria-hidden="true"
+              aria-hidden
             />
             {category.label}
-            <span className="text-content-tertiary">{count}</span>
+            <span className="tabular text-content-tertiary">{count}</span>
           </button>
         )
       })}

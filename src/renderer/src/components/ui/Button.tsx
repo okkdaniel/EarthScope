@@ -7,38 +7,49 @@ type Size = 'sm' | 'md'
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant
   size?: Size
+  /** Append the → glyph (the system's one link affordance). */
+  arrow?: boolean
 }
 
-const VARIANTS: Record<Variant, string> = {
-  primary: 'bg-accent text-white hover:bg-accent/90 active:bg-accent/80',
-  secondary:
-    'bg-surface-hover text-content-primary hover:bg-surface-overlay border border-surface-border',
-  ghost: 'text-content-secondary hover:text-content-primary hover:bg-surface-hover',
-  danger: 'bg-event-volcano/90 text-white hover:bg-event-volcano'
+/**
+ * In this system there are no filled buttons. An action reads as editorial text
+ * with a hairline underline that fades on hover — emphasis by ink weight, not
+ * by chrome. `primary` is primary-ink, everything else is quiet secondary-ink.
+ */
+const VARIANT: Record<Variant, string> = {
+  primary: 'text-content-primary font-medium',
+  secondary: 'text-content-primary',
+  ghost: 'text-content-secondary',
+  danger: 'text-content-primary'
 }
 
-const SIZES: Record<Size, string> = {
-  sm: 'h-8 px-3 text-xs gap-1.5',
-  md: 'h-9 px-4 text-sm gap-2'
+const SIZE: Record<Size, string> = {
+  sm: 'text-2xs tracking-meta uppercase',
+  md: 'text-sm'
 }
 
-/** The single button primitive used across the app. */
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = 'secondary', size = 'md', className, ...props },
+  { variant = 'secondary', size = 'md', arrow, className, children, ...props },
   ref
 ) {
   return (
     <button
       ref={ref}
       className={cn(
-        'inline-flex items-center justify-center rounded-lg font-medium',
-        'transition-colors duration-150 ease-out-soft',
-        'disabled:pointer-events-none disabled:opacity-50',
-        VARIANTS[variant],
-        SIZES[size],
+        'inline-flex items-baseline gap-1.5 border-b border-current pb-px hover-fade',
+        'disabled:pointer-events-none disabled:opacity-40',
+        VARIANT[variant],
+        SIZE[size],
         className
       )}
       {...props}
-    />
+    >
+      {children}
+      {arrow && (
+        <span aria-hidden className="ml-0.5">
+          →
+        </span>
+      )}
+    </button>
   )
 })
